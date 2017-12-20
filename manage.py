@@ -1,21 +1,38 @@
 #!/usr/bin/env python
 import os
 import sys
+from os.path import join
 
 from django.apps import apps
 from django.conf import settings
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv(), verbose=True)
 
 conf = {
     'INSTALLED_APPS': [
-        # add apps here
+        'app',
     ],
-    'DATABASES': {
+}
+
+if os.environ.get('ENV') == 'local':
+    conf['DATABASES'] = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join('.', 'db.sqlite3'),
+            'NAME': join('.', 'db.sqlite3'),
+        },
+    }
+elif os.environ.get('ENV') == 'development':
+    conf['DATABASES'] = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            # 'OPTIONS': {'charset': 'utf8mb4'},
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
         }
     }
-}
 
 if __name__ == "__main__":
     settings.configure(**conf)
